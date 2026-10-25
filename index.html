@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>PokerTable — Virtual Chip Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     REUSABLE SVG ICONS
+     ============================================================ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="icon-exit" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6.5 2.5H3.5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3"/>
+    <path d="M10.5 5 13.5 8l-3 3"/>
+    <path d="M13.5 8H6.5"/>
+  </symbol>
+  <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <path d="M12 3v18M3 12h18"/>
+  </symbol>
+  <symbol id="icon-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 14 4 9l5-5"/>
+    <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>
+  </symbol>
+</svg>
+
+<!-- ============================================================
+     PAGE: SETUP
+     ============================================================ -->
+<div id="page-setup">
+  <header class="setup-header">
+    <h1 class="setup-brand">♠ POKERTABLE</h1>
+    <p class="setup-subtitle">Virtual Chip Manager — Texas Hold'em</p>
+  </header>
+
+  <div class="setup-body">
+
+    <!-- Session card -->
+    <div class="setup-card" id="card-session">
+      <h2 class="setup-card__title">Session</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="session-name">Session Name</label>
+          <input class="form-input" id="session-name" type="text" placeholder="e.g. Friday Night Game" maxlength="40" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="game-mode">Game Mode</label>
+          <select class="form-select" id="game-mode">
+            <option value="interactive" selected>Interactive Mode</option>
+            <option value="manual">Manual Mode</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blinds card -->
+    <div class="setup-card" id="card-blinds">
+      <h2 class="setup-card__title">Blinds</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="small-blind">Small Blind</label>
+          <input class="form-input" id="small-blind" type="number" inputmode="numeric" min="1" value="10" placeholder="10">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="big-blind">Big Blind</label>
+          <input class="form-input" id="big-blind" type="number" inputmode="numeric" min="1" value="20" placeholder="20">
+        </div>
+      </div>
+      <p class="setup-error" id="blinds-error" aria-live="polite"></p>
+    </div>
+
+    <!-- Chip Denominations card -->
+    <div class="setup-card" id="card-denoms">
+      <h2 class="setup-card__title">Chip Denominations</h2>
+      <div class="denom-wrap" id="denom-tags" role="list" aria-label="Chip denominations"></div>
+      <div class="denom-add-row">
+        <input class="form-input" id="denom-input" type="number" inputmode="numeric" min="2" placeholder="Add denomination…">
+        <button class="btn btn--ghost btn--small" id="denom-add-btn" type="button">Add</button>
+      </div>
+      <p class="setup-error" id="denom-error" aria-live="polite"></p>
+    </div>
+
+    <!-- Players card -->
+    <div class="setup-card" id="card-players">
+      <div class="players-header">
+        <h2 class="setup-card__title" style="margin-bottom:0">Players</h2>
+        <span class="players-count" id="player-count-label">0 / 9 players</span>
+      </div>
+      <div id="player-list" role="list" aria-label="Players"></div>
+      <div class="add-player-row" id="add-player-row">
+        <input class="form-input" id="new-player-name" type="text" placeholder="Player name" maxlength="20" autocomplete="off">
+        <input class="form-input" id="new-player-chips" type="number" inputmode="numeric" min="1" value="1000" placeholder="Chips">
+        <button class="btn btn--ghost btn--small" id="add-player-btn" type="button">Add</button>
+      </div>
+      <p class="setup-error" id="player-error" aria-live="polite"></p>
+    </div>
+
+    <!-- Start button -->
+    <div>
+      <p class="setup-error" id="start-error" aria-live="polite" style="text-align:center;margin-bottom:8px"></p>
+      <button class="start-btn" id="start-game-btn" type="button">Start Game</button>
+    </div>
+
+  </div><!-- .setup-body -->
+</div><!-- #page-setup -->
+
+
+<!-- ============================================================
+     PAGE: GAME
+     ============================================================ -->
+<div id="page-game">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <span class="topbar__brand">♠ POKERTABLE</span>
+    <nav class="topbar__nav" aria-label="Game controls">
+      <button class="link link--primary" id="new-hand-btn" type="button">New Hand</button>
+      <button class="link link--danger"  id="end-session-btn" type="button">End Session</button>
+    </nav>
+  </header>
+
+  <!-- Main layout -->
+  <div class="layout">
+
+    <!-- Session info (top-left) -->
+    <div class="session" aria-label="Session information">
+      <h2 class="session__name" id="game-session-name">—</h2>
+      <div class="session__meta">
+        <span id="game-blinds-label">—</span>
+        <span id="game-hand-label">Hand #1</span>
+        <span id="game-mode-label"><span class="session__badge">Interactive</span></span>
+        <span id="game-street-label">Pre-flop</span>
+      </div>
+    </div>
+
+    <!-- Pot Distribution panel (left) -->
+    <aside class="panel pot-panel" aria-label="Pot Distribution">
+      <h3 class="panel__title">Pot Distribution</h3>
+      <p class="pot-panel__total">Pot: <strong id="pot-display-total">0</strong></p>
+      <ul class="pot-list" id="pot-list" aria-label="Player allocations"></ul>
+      <p class="pot-remainder" id="pot-remainder"></p>
+      <div class="pot-panel__actions">
+        <button class="btn btn--ghost" id="split-evenly-btn" type="button">Split Evenly</button>
+        <div class="pot-panel__confirm-row">
+          <button class="btn btn--distribute" id="distribute-btn" type="button">Distribute</button>
+          <button class="btn btn--ghost btn--danger" id="pot-clear-btn" type="button">Clear</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Poker table stage (center) -->
+    <section class="stage-wrap" aria-label="Poker table">
+      <div class="stage" id="stage">
+        <div class="table" aria-hidden="true"></div>
+
+        <!-- Board overlay (pot, cards, street) -->
+        <div class="board" aria-live="polite">
+          <p class="pot">
+            <span class="pot__label">POT</span>
+            <span class="pot__value" id="board-pot">0</span>
+          </p>
+          <div class="cards" id="community-cards" role="list" aria-label="Community cards">
+            <!-- 5 card slots rendered by JS -->
+          </div>
+          <p class="street" id="board-street">Pre-flop</p>
+          <p class="street-prompt" id="street-prompt" aria-live="assertive"></p>
+        </div>
+
+        <!-- Player seats rendered dynamically by JS into #stage -->
+        <!-- Add player button (last slot) -->
+        <button class="seat seat--add" id="add-player-seat-btn" type="button" aria-label="Add player to table" style="display:none">
+          <svg aria-hidden="true"><use href="#icon-plus"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- Betting controls (bottom center) -->
+    <section class="controls" aria-label="Betting controls" id="betting-controls">
+      <!-- Current player bar -->
+      <div class="current-player-bar" id="current-player-bar">Waiting…</div>
+
+      <!-- Manual mode: player selector row -->
+      <div class="manual-select-row hidden" id="manual-select-row">
+        <label for="manual-player-select">Acting:</label>
+        <select id="manual-player-select"></select>
+      </div>
+
+      <!-- Bet slider -->
+      <input class="slider" id="bet-slider" type="range" min="0" max="1000" step="1" value="0" aria-label="Bet amount">
+
+      <!-- Row 1: Undo | Bet amount display | All-in -->
+      <button class="btn btn--ghost" id="undo-btn" type="button" title="Undo last action">
+        <svg width="14" height="14" aria-hidden="true"><use href="#icon-undo"/></svg> Undo
+      </button>
+      <div class="field" id="bet-amount-display">0</div>
+      <button class="btn btn--allin" id="allin-btn" type="button">All-in</button>
+
+      <!-- Row 2: Fold | Check/Call | Raise/Bet -->
+      <button class="btn btn--fold"  id="fold-btn"  type="button">Fold</button>
+      <button class="btn btn--call"  id="call-btn"  type="button">Check</button>
+      <button class="btn btn--raise" id="raise-btn" type="button">Raise</button>
+
+      <!-- Next Street / Showdown (full-width, shown when round complete) -->
+      <button class="btn btn--next-street hidden" id="next-street-btn" type="button">→ Continue to Flop</button>
+    </section>
+
+    <!-- Action History panel (right) -->
+    <aside class="panel history" aria-label="Action History" aria-live="polite">
+      <h3 class="panel__title">Action History</h3>
+      <ul class="history__list" id="history-list" aria-label="Game history"></ul>
+    </aside>
+
+  </div><!-- .layout -->
+</div><!-- #page-game -->
+
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+
+<!-- Generic confirm modal -->
+<div class="modal-backdrop hidden" id="modal-confirm" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-title">
+  <div class="modal">
+    <h2 class="modal__title" id="modal-confirm-title">Confirm</h2>
+    <p class="modal__body" id="modal-confirm-body"></p>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" id="modal-confirm-cancel" type="button">Cancel</button>
+      <button class="btn btn--danger" id="modal-confirm-ok" type="button">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add player (during game) modal -->
+<div class="modal-backdrop hidden" id="modal-add-player" role="dialog" aria-modal="true" aria-labelledby="modal-add-title">
+  <div class="modal">
+    <h2 class="modal__title" id="modal-add-title">Add Player</h2>
+    <div class="modal-form">
+      <div class="form-group">
+        <label for="modal-player-name">Player Name</label>
+        <input class="form-input" id="modal-player-name" type="text" placeholder="Name" maxlength="20" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="modal-player-chips">Starting Chips</label>
+        <input class="form-input" id="modal-player-chips" type="number" inputmode="numeric" min="1" value="1000">
+      </div>
+      <p class="setup-error" id="modal-player-error" aria-live="polite"></p>
+    </div>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" id="modal-add-cancel" type="button">Cancel</button>
+      <button class="btn btn--raise" id="modal-add-ok" type="button">Add Player</button>
+    </div>
+  </div>
+</div>
+
+<!-- End session summary modal -->
+<div class="modal-backdrop hidden" id="modal-session-end" role="dialog" aria-modal="true" aria-labelledby="modal-end-title">
+  <div class="modal" style="max-width:520px">
+    <h2 class="modal__title" id="modal-end-title">Session Summary</h2>
+    <div class="modal__body" id="modal-end-body" style="max-height:320px;overflow-y:auto"></div>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" id="modal-end-new" type="button">New Session</button>
+      <button class="btn btn--danger" id="modal-end-close" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+<script src="script.js"></script>
+</body>
+</html>

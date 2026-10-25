@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Poker Table</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ikon dipakai ulang -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="icon-exit" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6.5 2.5H3.5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3"/>
+      <path d="M10.5 5 13.5 8l-3 3"/>
+      <path d="M13.5 8H6.5"/>
+    </symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <path d="M12 3v18M3 12h18"/>
+    </symbol>
+  </svg>
+
+  <header class="topbar">
+    <h1 class="brand">POKER TABLE</h1>
+    <nav class="topbar__nav">
+      <button class="link" type="button">New Hand</button>
+      <button class="link link--danger" type="button">End Session</button>
+    </nav>
+  </header>
+
+  <div class="layout">
+
+    <!-- Info sesi -->
+    <div class="session">
+      <h2 class="session__name">Name Session</h2>
+      <p class="session__meta">$10 / $20 . Hand #4</p>
+    </div>
+
+    <!-- Pot Distribution (kiri) -->
+    <aside class="panel pot-panel" aria-label="Pot Distribution">
+      <h3 class="panel__title">Pot Distribution</h3>
+      <p class="pot-panel__total">Pot: <span id="pot-total">1820</span></p>
+
+      <ul class="pot-list" id="pot-list">
+        <li><label for="p-eggy">Eggy</label><input id="p-eggy" type="number" inputmode="numeric" min="0" value="0"></li>
+        <li><label for="p-inggi">Inggi</label><input id="p-inggi" type="number" inputmode="numeric" min="0" value="0"></li>
+        <li><label for="p-rayhan">Rayhan</label><input id="p-rayhan" type="number" inputmode="numeric" min="0" value="0"></li>
+        <li><label for="p-jolang">Jolang</label><input id="p-jolang" type="number" inputmode="numeric" min="0" value="0"></li>
+      </ul>
+
+      <div class="pot-panel__actions">
+        <button class="btn btn--ghost" type="button" id="split-btn">Split Evenly</button>
+        <button class="btn btn--raise" type="button" data-raise>Raise to $160</button>
+      </div>
+    </aside>
+
+    <!-- Meja -->
+    <section class="stage-wrap" aria-label="Meja poker">
+      <div class="stage">
+        <div class="table" aria-hidden="true"></div>
+
+        <div class="board">
+          <p class="pot"><span class="pot__label">POT:</span><span class="pot__value">$1820</span></p>
+          <div class="cards">
+            <span class="card"></span>
+            <span class="card"></span>
+            <span class="card"></span>
+            <span class="card card--empty"></span>
+            <span class="card card--empty"></span>
+          </div>
+          <p class="street">Flop</p>
+        </div>
+
+        <article class="seat seat--top">
+          <h4 class="seat__name">Eggy</h4>
+          <button class="seat__exit" type="button" aria-label="Keluarkan Eggy"><svg><use href="#icon-exit"/></svg></button>
+          <p class="seat__stack">$820</p>
+          <p class="seat__in">In: $820</p>
+        </article>
+
+        <article class="seat seat--left-top">
+          <h4 class="seat__name">Rayhan</h4>
+          <button class="seat__exit" type="button" aria-label="Keluarkan Rayhan"><svg><use href="#icon-exit"/></svg></button>
+          <p class="seat__stack">$820</p>
+          <p class="seat__in">In: $820</p>
+        </article>
+
+        <article class="seat seat--right-top">
+          <h4 class="seat__name">Inggi</h4>
+          <button class="seat__exit" type="button" aria-label="Keluarkan Inggi"><svg><use href="#icon-exit"/></svg></button>
+          <p class="seat__stack">$820</p>
+          <p class="seat__in">In: $820</p>
+        </article>
+
+        <!-- Seat kosong -->
+        <button class="seat seat--add seat--left-bottom" type="button" aria-label="Tambah pemain">
+          <svg><use href="#icon-plus"/></svg>
+        </button>
+
+        <article class="seat seat--right-bottom seat--active">
+          <h4 class="seat__name">Jolang</h4>
+          <button class="seat__exit" type="button" aria-label="Keluarkan Jolang"><svg><use href="#icon-exit"/></svg></button>
+          <p class="seat__stack">$820</p>
+        </article>
+
+        <article class="seat seat--bottom">
+          <h4 class="seat__name">Fayiz</h4>
+          <button class="seat__exit" type="button" aria-label="Keluarkan Fayiz"><svg><use href="#icon-exit"/></svg></button>
+          <p class="seat__stack">$820</p>
+          <p class="seat__in">In: $820</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Kontrol aksi -->
+    <section class="controls" aria-label="Aksi pemain">
+      <input class="slider" id="bet-slider" type="range" min="0" max="500" step="10" value="160" aria-label="Jumlah raise">
+      <button class="btn btn--ghost" type="button">Undo</button>
+      <button class="btn btn--ghost" type="button">All-in</button>
+      <div class="field" id="bet-amount">$160</div>
+      <button class="btn btn--fold" type="button">Fold</button>
+      <button class="btn btn--call" type="button">Call $80</button>
+      <button class="btn btn--raise" type="button" data-raise>Raise to $160</button>
+    </section>
+
+    <!-- Action History (kanan) -->
+    <aside class="panel history" aria-label="Action History">
+      <h3 class="panel__title">Action History</h3>
+      <ul class="history__list"></ul>
+    </aside>
+
+  </div>
+
+  <script>
+    // Slider -> nominal & semua tombol "Raise to"
+    const slider = document.getElementById('bet-slider');
+    const amount = document.getElementById('bet-amount');
+    const raiseBtns = document.querySelectorAll('[data-raise]');
+    function sync() {
+      const pct = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+      slider.style.setProperty('--p', pct + '%');
+      amount.textContent = '$' + slider.value;
+      raiseBtns.forEach(b => b.textContent = 'Raise to $' + slider.value);
+    }
+    slider.addEventListener('input', sync);
+    sync();
+
+    // Split Evenly: bagi pot sama rata ke semua pemain di daftar
+    document.getElementById('split-btn').addEventListener('click', () => {
+      const total = parseInt(document.getElementById('pot-total').textContent, 10) || 0;
+      const inputs = document.querySelectorAll('#pot-list input');
+      const share = Math.floor(total / inputs.length);
+      let rest = total - share * inputs.length;
+      inputs.forEach(i => { i.value = share + (rest-- > 0 ? 1 : 0); });
+    });
+  </script>
+</body>
+</html>
